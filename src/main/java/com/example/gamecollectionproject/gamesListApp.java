@@ -6,6 +6,7 @@ package com.example.gamecollectionproject;
 // File: gamesListApp.java
 // Description: This program works as a game collection sorter. It includes options to record each item and its quality, the date acquired, etc.
 // **********************************************************************************
+
 import javafx.application.Application;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -112,6 +113,7 @@ public class gamesListApp extends Application {
         Button sortByDate = new Button("Sort By Date");
         Button sortByPricePaid = new Button("Sort By Paid");
         Button sortByItemCondition = new Button("Sort by Item Condition");
+        Button sortButton = new Button("Click to cycle through sorts for the full list display");
         Button createBackupButton=new Button("Create backup of current list");
         Button clearButton=new Button("Clear Games");
         GridPane.setConstraints(platform,0,0);
@@ -168,6 +170,30 @@ public class gamesListApp extends Application {
             }
             out.positionCaret(scrollPos);
         });
+        Queue<Method> sortQueue = new LinkedList<Method>();
+        sortQueue.add((gameList.getClass().getMethod(("sortByCountry"))));
+        sortQueue.add((gameList.getClass().getMethod(("sortByDeveloper"))));
+        sortQueue.add((gameList.getClass().getMethod(("sortByTitles"))));
+        sortQueue.add((gameList.getClass().getMethod(("sortByPlatform"))));
+        sortQueue.add((gameList.getClass().getMethod(("sortByPublisher"))));
+        sortButton.setOnAction(actionEvent ->{ //Project Part 2: Adding a stack which cycles through methods.
+            try { //Might add way to consider current list display in the future when sorting instead of pasting the full list
+                Method temp = sortQueue.peek();
+                sortQueue.poll().invoke(gameList);
+                sortQueue.add(temp);
+                int scrollPos = out.caretPositionProperty().get();
+                out.setText("");
+                for(int i=0; i<gameList.getGames().size(); i++){
+                    out.appendText(gameList.getGames().get(i).toString() + "\n\n");
+                }
+                sortButton.setText("Current sort: " + temp.getName().toString().replace("sortBy","") +  " -> Sort next: " + sortQueue.peek().getName().toString().replace("sortBy",""));
+                out.positionCaret(scrollPos);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        });
         removeButton.setOnAction(actionEvent -> {
             int scrollPos = out.caretPositionProperty().get();
             gameList.remove(platformField.getText(),categoryField.getText(),userRecordTypeField.getText(),titleField.getText(),countryField.getText(),releaseTypeField.getText(),publisherField.getText(),developerField.getText(),createdAtField.getText(),ownershipField.getText(),priceLooseField.getText(),priceCIBField.getText(),priceNewField.getText(),yourPriceField.getText(),pricePaidField.getText(),itemConditionField.getText(),boxConditionField.getText(),manualConditionField.getText(),notesField.getText(),tagsField.getText());
@@ -181,6 +207,7 @@ public class gamesListApp extends Application {
             int scrollPos = out.caretPositionProperty().get();
             out.setText("");
             gameList.sortByTitles();
+            sortButton.setText("Current sort: By title  -> Next sort: " + sortQueue.peek().getName().toString().replace("sortBy",""));
             for(int i=0; i<gameList.getGames().size(); i++){
                 out.appendText(gameList.getGames().get(i).getTitle() + "\n");
             }
@@ -199,6 +226,7 @@ public class gamesListApp extends Application {
             int scrollPos = out.caretPositionProperty().get();
             out.setText("");
             gameList.sortByDeveloper();
+            sortButton.setText("Current sort: By developer -> Next sort: " + sortQueue.peek().getName().toString().replace("sortBy",""));
             String[][] temp = gameList.getDevelopers();
             for(int i=0; i<temp.length; i++){
                 out.appendText(temp[i][0] + " | " + temp[i][1] +  "\n");
@@ -210,6 +238,7 @@ public class gamesListApp extends Application {
             int scrollPos = out.caretPositionProperty().get();
             out.setText("");
             gameList.sortByPublisher();
+            sortButton.setText("Current sort: By publisher  -> Next sort: " + sortQueue.peek().getName().toString().replace("sortBy",""));
             String[][] temp = gameList.getPublishers();
             for(int i=0; i<temp.length; i++){
                 out.appendText(temp[i][0] + " | " + temp[i][1] +  "\n");
@@ -221,6 +250,7 @@ public class gamesListApp extends Application {
             int scrollPos = out.caretPositionProperty().get();
             out.setText("");
             gameList.sortByCountry();
+            sortButton.setText("Current sort: By country  -> Next sort: " + sortQueue.peek().getName().toString().replace("sortBy",""));
             String[][] temp = gameList.getCountries();
             for(int i=0; i<temp.length; i++){
                 out.appendText(temp[i][0] + " | " + temp[i][1] +  "\n");
@@ -278,6 +308,7 @@ public class gamesListApp extends Application {
         output.setMinHeight(300);
         view.setPadding(new Insets(5,5,5,5));
         view.setLeft(grid);
+        output.getChildren().add(sortButton);
         view.setCenter(output);
         view.setRight(new VBox());
         view.setTop(top);
@@ -676,7 +707,7 @@ class gamesList{
         }
         return arrayLister;
     }
-    void sortByTitles(){
+    public void sortByTitles(){
         this.games.sort(new Comparator<Game>() {
             @Override
             public int compare(Game o1, Game o2) {
@@ -684,7 +715,7 @@ class gamesList{
             }
         });
     }
-    void sortByPlatform(){
+    public void sortByPlatform(){
         this.games.sort(new Comparator<Game>() {
             @Override
             public int compare(Game o1, Game o2) {
@@ -692,7 +723,7 @@ class gamesList{
             }
         });
     }
-    void sortByPublisher(){
+    public void sortByPublisher(){
         this.games.sort(new Comparator<Game>() {
             @Override
             public int compare(Game o1, Game o2) {
@@ -700,7 +731,7 @@ class gamesList{
             }
         });
     }
-    void sortByCountry(){
+    public void sortByCountry(){
         this.games.sort(new Comparator<Game>() {
             @Override
             public int compare(Game o1, Game o2) {
@@ -708,7 +739,7 @@ class gamesList{
             }
         });
     }
-    void sortByDeveloper(){
+    public void sortByDeveloper(){
         this.games.sort(new Comparator<Game>() {
             @Override
             public int compare(Game o1, Game o2) {
@@ -716,7 +747,7 @@ class gamesList{
             }
         });
     }
-    Integer titleCount(){
+    public Integer titleCount(){
         return this.getGames().size();
     }
 }
