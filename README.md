@@ -2,7 +2,7 @@ Who are the users of the software?
 People with large collections of games that want a simple way to add or remove titles.
 
 What is the purpose of the software?
-To remove and manage a large collection of games, although it can technically be used to manage other media if listed in the same format
+To manage, add, and remove from a large collection of games, although it can also be used to manage other media if listed in the same format
 
 Where and when will the software be used?
 When a game needs its information to be quickly viewed.
@@ -13,7 +13,7 @@ The collection is saved as "gameCollection.csv" and can be backed up or cleared 
 They can also remove any game from the list by having their input matched to the closest result, skipping blank inputs.
 
 Why would anyone want to use the software over existing processes?
-For the specific ease of use of having all of the controls in one place when managing the collection with more options planned.
+For the specific ease of use of having all of the controls in one place when managing the collection, as well as there being more options planned.
 
 UML:
 ![uml_gameproject-1](https://github.com/quinn424/gameCollectionProject/assets/167268172/aa7e18d3-cec3-47e3-ad45-b0fbea01e8f5)
