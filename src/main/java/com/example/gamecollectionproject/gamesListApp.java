@@ -104,6 +104,7 @@ public class gamesListApp extends Application {
         Button showPublishersButton=new Button("Show Publishers");
         Button showCountriesButton=new Button("Show Countries");
         Button showTitlesButton=new Button("Show Titles");
+        Button asTree=new Button("Show as Tree");
         Button sortByTitlesButton = new Button("Sort By Titles");
         Button sortByPublishers = new Button("Sort By Publishers");
         Button sortByCategory = new Button("Sort By Category");
@@ -299,6 +300,31 @@ public class gamesListApp extends Application {
                 out.appendText("\nSuccessfully cleared");
             }
         });
+        asTree.setOnAction(actionEvent -> {
+            String temp =sortQueue.peek().getName().toString().replace("sortBy","");
+            TreeView trr = new TreeView();
+            Stage treeStage = new Stage();
+            BorderPane treePane = new BorderPane();
+            VBox v = new VBox();
+//            TreeSet<String> tree = new TreeSet();
+//            for(int i=0; i< gameList.getGames().size(); i++){
+//                if(!(tree.contains(gameList.getGames().get(i).getTitle()))){
+//                    tree.add(gameList.getGames().get(i).getTitle());
+//                }
+//            }
+//            System.out.println(tree.toString());
+            TextArea t = new TextArea();
+            t.setMinHeight(30);
+            t.setMinWidth(30);
+            t.setText(temp);
+            v.getChildren().add(t);
+            treePane.setCenter(v);
+            Scene treeScene = new Scene(treePane, 500, 300);
+            treeStage.setTitle("Tree view");
+            treeStage.setResizable(true);
+            treeStage.setScene(treeScene);
+            treeStage.show();
+        });
         grid.setStyle("-fx-background-color: FFFF00;");
         grid.setPadding(new Insets(5,5,5,5));
         output.setAlignment(Pos.CENTER);
@@ -309,6 +335,7 @@ public class gamesListApp extends Application {
         view.setPadding(new Insets(5,5,5,5));
         view.setLeft(grid);
         output.getChildren().add(sortButton);
+ //       output.getChildren().add(asTree);
         view.setCenter(output);
         view.setRight(new VBox());
         view.setTop(top);
@@ -329,7 +356,6 @@ public class gamesListApp extends Application {
             System.exit(0);
         });
     }
-
     public static void main(String[] args) {
         launch();
     }
@@ -372,6 +398,38 @@ class gamesList{
     }
     public ArrayList<Game> getGames() {
         return games;
+    }
+    public String[][] getGamesString(){
+        HashSet<String> e = new HashSet<String>();
+        ArrayList<String> t = new ArrayList<>();
+        int count=0;
+        int index=0;
+        for(int i=0; i<this.getGames().size();i++){
+            if(this.games.get(i).getTitle().equalsIgnoreCase("")||this.games.get(i).getTitle().equalsIgnoreCase("Unknown")||this.games.get(i).getTitle().equalsIgnoreCase(",")){
+                e.add("Unknown");
+            }else {
+                e.add(this.games.get(i).getTitle());
+            }
+        }
+        String[][] temp = new String[e.size()][2];
+        for(int i=0; i<e.size();i++){
+            temp[i][0]= (String) e.toArray()[i];
+            temp[i][1]="0";
+        }
+        int num=0;
+        Iterator i=e.iterator();
+        while(i.hasNext()){
+            String tem = i.next().toString();
+            for(int k=0; k<this.getGames().size(); k++){
+                if(tem.equalsIgnoreCase(this.getGames().get(k).getTitle())){
+                    temp[num][1]=""+(Integer)(Integer.parseInt(temp[num][1])+1);
+                }else if((tem.equalsIgnoreCase("Unknown")&&(this.getGames().get(k).getTitle().equalsIgnoreCase("")||this.getGames().get(k).getTitle().equalsIgnoreCase("Unknown")))){
+                    temp[num][1]=""+(Integer)(Integer.parseInt(temp[num][1])+1);
+                }
+            }
+            num++;
+        }
+        return temp;
     }
     public String[][] getCountries(){
         HashSet<String> e = new HashSet<String>();
