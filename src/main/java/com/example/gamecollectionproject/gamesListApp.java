@@ -22,6 +22,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class gamesListApp extends Application {
@@ -37,7 +38,6 @@ public class gamesListApp extends Application {
         Hashtable counter = new Hashtable();
         TilePane labels = new TilePane();
         GridPane grid = new GridPane();
-        HBox top = new HBox();
         HBox options = new HBox();
         labels.setPadding(new Insets(3,3,3,3));
         VBox output = new VBox();
@@ -56,7 +56,7 @@ public class gamesListApp extends Application {
         labels.setHgap(3);
         labels.setPrefColumns(2);
         labels.setStyle("-fx-background-color: FFFF00;");
-
+        //Ideas: More sorts (such as lowest price), total price (into a box on the side),
         Label platform=new Label("Platform: ");
         TextField platformField=new TextField();
         Label category=new Label("Category: ");
@@ -98,6 +98,26 @@ public class gamesListApp extends Application {
         TextField notesField = new TextField();
         Label tags=new Label("Tags: ");
         TextField tagsField = new TextField();
+        TextField totalTitles = new TextField("Titles: ");
+        TextField totalValue = new TextField("Value: ");
+        TextField totalYourPrice = new TextField("Your Total: ");
+        double value=0.0; //New price, according to online
+        double yourTotal=0.0; //Price paid as of acquired date
+        int titleCount=gameList.getGames().size();
+        for(int i=0; i<gameList.getGames().size();i++){
+            if(!(gameList.getGames().get(i).getPriceNew().equalsIgnoreCase("-1.0") || gameList.getGames().get(i).getPriceNew().equalsIgnoreCase("?") || gameList.getGames().get(i).getPriceNew().matches(".*[a-z].*") || gameList.getGames().get(i).getPriceNew().equalsIgnoreCase("CIB"))) {
+                value = value + Double.parseDouble(gameList.getGames().get(i).getPriceNew());
+            }
+            if(!(gameList.getGames().get(i).getYourPrice().equalsIgnoreCase("-1.0") || gameList.getGames().get(i).getYourPrice().equalsIgnoreCase("?") || gameList.getGames().get(i).getYourPrice().matches(".*[a-z].*") || gameList.getGames().get(i).getYourPrice().equalsIgnoreCase("CIB"))) {
+                yourTotal=yourTotal+Double.parseDouble(gameList.getGames().get(i).getYourPrice());
+            }
+        }
+        totalYourPrice.setText("Your Total: $" + new DecimalFormat("###,###,###.00").format(yourTotal));
+        totalValue.setText("Value: $" + new DecimalFormat("###,###,###.00").format(value));
+        totalTitles.setText("Titles: " + titleCount);
+        totalValue.setEditable(false);
+        totalYourPrice.setEditable(false);
+        totalTitles.setEditable(false);
         Button submitButton=new Button("Add");
         submitButton.setTooltip(new Tooltip("Adds any filled fields to the list, as long as there is a title and there is no existing exact match."));
         Button removeButton=new Button("Remove");
@@ -120,6 +140,8 @@ public class gamesListApp extends Application {
         Button sortButton = new Button("Click to cycle through sorts for the full list display");
         Button createBackupButton=new Button("Create backup of current list");
         Button clearButton=new Button("Clear Games");
+        Region left = new Region();
+        HBox.setHgrow(left,Priority.ALWAYS);
         GridPane.setConstraints(platform,0,0);
         GridPane.setConstraints(platformField,1,0);
         GridPane.setConstraints(category,0,1);
@@ -162,7 +184,8 @@ public class gamesListApp extends Application {
         GridPane.setConstraints(tagsField,1,19);
         GridPane.setConstraints(submitButton,0,20);
         GridPane.setConstraints(removeButton,1,20);
-        top.getChildren().addAll(createBackupButton,clearButton);
+        HBox top = new HBox(createBackupButton,clearButton,left,totalTitles,totalValue,totalYourPrice);
+        //top.getChildren().addAll(createBackupButton,clearButton);
         grid.getChildren().addAll(platform,platformField,category,categoryField,userRecordType,userRecordTypeField,title,titleField,country,countryField,releaseType,releaseTypeField,publisher,publisherField,developer,developerField,createdAt,createdAtField,ownership,ownershipField,priceLoose,priceLooseField,priceCIB,priceCIBField,priceNew,priceNewField,yourPrice,yourPriceField,pricePaid,pricePaidField,itemCondition,itemConditionField,boxCondition,boxConditionField,manualCondition,manualConditionField,notes,notesField,tags,tagsField,submitButton,removeButton);
         options.getChildren().addAll(showAllButton,showCountriesButton,showTitlesButton,showDevelopersButton,showPublishersButton);
         submitButton.setOnAction(actionEvent -> {
@@ -211,6 +234,10 @@ public class gamesListApp extends Application {
             out.positionCaret(scrollPos);
         });
         showTitlesButton.setOnAction(actionEvent -> {
+            out.setVisible(true);
+            out.setManaged(true);
+            tree.setManaged(false);
+            tree.setVisible(false);
             int scrollPos = out.caretPositionProperty().get();
             out.setText("");
             gameList.sortByTitles();
@@ -222,6 +249,10 @@ public class gamesListApp extends Application {
             out.positionCaret(scrollPos);
         });
         showAllButton.setOnAction(actionEvent -> {
+            out.setVisible(true);
+            out.setManaged(true);
+            tree.setManaged(false);
+            tree.setVisible(false);
             int scrollPos = out.caretPositionProperty().get();
             out.setText("");
             for(int i=0; i<gameList.getGames().size(); i++){
@@ -230,6 +261,10 @@ public class gamesListApp extends Application {
             out.positionCaret(scrollPos);
         });
         showDevelopersButton.setOnAction(actionEvent ->{
+            out.setVisible(true);
+            out.setManaged(true);
+            tree.setManaged(false);
+            tree.setVisible(false);
             int scrollPos = out.caretPositionProperty().get();
             out.setText("");
             gameList.sortByDeveloper();
@@ -242,6 +277,10 @@ public class gamesListApp extends Application {
             out.positionCaret(scrollPos);
         });
         showPublishersButton.setOnAction(actionEvent ->{
+            out.setVisible(true);
+            out.setManaged(true);
+            tree.setManaged(false);
+            tree.setVisible(false);
             int scrollPos = out.caretPositionProperty().get();
             out.setText("");
             gameList.sortByPublisher();
@@ -254,6 +293,10 @@ public class gamesListApp extends Application {
             out.positionCaret(scrollPos);
         });
         showCountriesButton.setOnAction(actionEvent ->{
+            out.setVisible(true);
+            out.setManaged(true);
+            tree.setManaged(false);
+            tree.setVisible(false);
             int scrollPos = out.caretPositionProperty().get();
             out.setText("");
             gameList.sortByCountry();
@@ -310,7 +353,7 @@ public class gamesListApp extends Application {
                 out.appendText("\nSuccessfully cleared");
             }
         });
-        asTree.setOnAction(actionEvent -> {
+        asTree.setOnAction(actionEvent -> { //Project Part 3: Adding the tree
             if(out.isVisible()){
                 out.setVisible(false);
                 out.setManaged(false);
@@ -322,33 +365,9 @@ public class gamesListApp extends Application {
                 tree.setManaged(false);
                 tree.setVisible(false);
             }
-//            String temp =sortQueue.peek().getName().toString().replace("sortBy","");
-//            TreeView trr = new TreeView();
-//            Stage treeStage = new Stage();
-//            BorderPane treePane = new BorderPane();
-//            VBox v = new VBox();
-
             tree.setRoot(createTree(gameList));
-//            TreeSet<String> tree = new TreeSet();
-//            for(int i=0; i< gameList.getGames().size(); i++){
-//                if(!(tree.contains(gameList.getGames().get(i).getTitle()))){
-//                    tree.add(gameList.getGames().get(i).getTitle());
-//                }
-//            }
-//            System.out.println(tree.toString());
-//            TextArea t = new TextArea();
-//            t.setMinHeight(30);
-//            t.setMinWidth(30);
-//            t.setText(temp);
-//            v.getChildren().add(t);
-//            treePane.setCenter(v);
-//            Scene treeScene = new Scene(treePane, 500, 300);
-//            treeStage.setTitle("Tree view");
-//            treeStage.setResizable(true);
-//            treeStage.setScene(treeScene);
-//            treeStage.show();
         });
-        grid.setStyle("-fx-background-color: FFFF00;");
+        grid.setStyle("-fx-background-color: #a6eded;");
         grid.setPadding(new Insets(5,5,5,5));
         output.setAlignment(Pos.CENTER);
         grid.setAlignment(Pos.CENTER_LEFT);
@@ -394,7 +413,7 @@ public class gamesListApp extends Application {
         }
         return temp;
     }
-    TreeItem<String> createTree(gamesList games){
+    TreeItem<String> createTree(gamesList games){ //Project part 3:
         TreeItem<String> rootItem = new TreeItem<String> ("Games", new VBox());
         TreeItem<String> item1;
         rootItem.setExpanded(true);
@@ -402,7 +421,7 @@ public class gamesListApp extends Application {
             item1 = new TreeItem<String> (games.getGames().get(k).getTitle(), new VBox());
             for (int i = 0; i < games.parameterCounter(); i++) {
                 if(!(games.getGames().get(k).getParameter(i).equalsIgnoreCase("") || games.getGames().get(k).getParameter(i).equalsIgnoreCase("Missing Field") || games.getGames().get(k).getParameter(i).equalsIgnoreCase("Null"))){
-                    TreeItem<String> item = new TreeItem<String>(games.getGames().get(k).getParameter(i));
+                    TreeItem<String> item = new TreeItem<String>(games.getGames().get(k).getParameters().get(i) + ": " + games.getGames().get(k).getParameter(i));
                     item1.getChildren().add(item);
                 }
             }
@@ -877,8 +896,29 @@ class Game{
     String tags;
     String game;
     String[] parameterArray;
+    ArrayList<String> parameters = new ArrayList();
 
     public Game() {
+        this.parameters.add("Platform");
+        this.parameters.add("Category");
+        this.parameters.add("userRecordType");
+        this.parameters.add("title");
+        this.parameters.add("country");
+        this.parameters.add("releaseType");
+        this.parameters.add("publisher");
+        this.parameters.add("developer");
+        this.parameters.add("createdAt");
+        this.parameters.add("ownership");
+        this.parameters.add("priceLoose");
+        this.parameters.add("priceCIB");
+        this.parameters.add("priceNew");
+        this.parameters.add("yourPrice");
+        this.parameters.add("pricePaid");
+        this.parameters.add("itemCondition");
+        this.parameters.add("boxCondition");
+        this.parameters.add("manualCondition");
+        this.parameters.add("notes");
+        this.parameters.add("tags");
         this.platform="null";
         this.category="null";
         this.userRecordType="null";
@@ -910,6 +950,27 @@ class Game{
             s[i] = s[i].trim();
         }
         parameterArray=s;
+        this.parameters.add("Platform");
+        this.parameters.add("Category");
+        this.parameters.add("userRecordType");
+        this.parameters.add("title");
+        this.parameters.add("country");
+        this.parameters.add("releaseType");
+        this.parameters.add("publisher");
+        this.parameters.add("developer");
+        this.parameters.add("createdAt");
+        this.parameters.add("ownership");
+        this.parameters.add("priceLoose");
+        this.parameters.add("priceCIB");
+        this.parameters.add("priceNew");
+        this.parameters.add("yourPrice");
+        this.parameters.add("pricePaid");
+        this.parameters.add("itemCondition");
+        this.parameters.add("boxCondition");
+        this.parameters.add("manualCondition");
+        this.parameters.add("notes");
+        this.parameters.add("tags");
+
         this.platform=s[0];
         this.category=s[1];
         this.userRecordType=s[2];
@@ -933,6 +994,26 @@ class Game{
     }
 
     public Game(Game game) {
+        this.parameters.add("Platform");
+        this.parameters.add("Category");
+        this.parameters.add("userRecordType");
+        this.parameters.add("title");
+        this.parameters.add("country");
+        this.parameters.add("releaseType");
+        this.parameters.add("publisher");
+        this.parameters.add("developer");
+        this.parameters.add("createdAt");
+        this.parameters.add("ownership");
+        this.parameters.add("priceLoose");
+        this.parameters.add("priceCIB");
+        this.parameters.add("priceNew");
+        this.parameters.add("yourPrice");
+        this.parameters.add("pricePaid");
+        this.parameters.add("itemCondition");
+        this.parameters.add("boxCondition");
+        this.parameters.add("manualCondition");
+        this.parameters.add("notes");
+        this.parameters.add("tags");
         this.platform=game.getPlatform();
         this.category=game.getCategory();
         this.userRecordType=game.getUserRecordType();
@@ -976,6 +1057,26 @@ class Game{
         this.manualCondition=manualCondition.replace(",","");
         this.notes=notes.replace(",","");
         this.tags=tags.replace(",","");
+        this.parameters.add("Platform");
+        this.parameters.add("Category");
+        this.parameters.add("userRecordType");
+        this.parameters.add("title");
+        this.parameters.add("country");
+        this.parameters.add("releaseType");
+        this.parameters.add("publisher");
+        this.parameters.add("developer");
+        this.parameters.add("createdAt");
+        this.parameters.add("ownership");
+        this.parameters.add("priceLoose");
+        this.parameters.add("priceCIB");
+        this.parameters.add("priceNew");
+        this.parameters.add("yourPrice");
+        this.parameters.add("pricePaid");
+        this.parameters.add("itemCondition");
+        this.parameters.add("boxCondition");
+        this.parameters.add("manualCondition");
+        this.parameters.add("notes");
+        this.parameters.add("tags");
     }
 
     public String getGame() {
@@ -1173,5 +1274,9 @@ class Game{
 
     public String getParameter(int i) {
         return parameterArray[i];
+    }
+
+    public ArrayList<String> getParameters() {
+        return parameters;
     }
 }
