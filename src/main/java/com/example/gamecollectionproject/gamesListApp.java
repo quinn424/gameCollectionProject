@@ -895,7 +895,7 @@ class Game{
     String notes;
     String tags;
     String game;
-    String[] parameterArray;
+    String[] parameterArray=new String[20];
     ArrayList<String> parameters = new ArrayList();
 
     public Game() {
@@ -949,7 +949,7 @@ class Game{
             s[i]= s[i].replaceAll("\"","");
             s[i] = s[i].trim();
         }
-        parameterArray=s;
+        this.parameterArray=s;
         this.parameters.add("Platform");
         this.parameters.add("Category");
         this.parameters.add("userRecordType");
@@ -1034,6 +1034,26 @@ class Game{
         this.manualCondition=game.getManualCondition();
         this.notes=game.getNotes();
         this.tags=game.getTags();
+        this.parameterArray[0]=this.platform;
+        this.parameterArray[1]=this.category;
+        this.parameterArray[2]=this.userRecordType;
+        this.parameterArray[3]=this.title;
+        this.parameterArray[4]=this.country;
+        this.parameterArray[5]=this.releaseType;
+        this.parameterArray[6]=this.publisher;
+        this.parameterArray[7]=this.developer;
+        this.parameterArray[8]=this.createdAt;
+        this.parameterArray[9]=this.ownership;
+        this.parameterArray[10]=this.priceLoose;
+        this.parameterArray[11]=this.priceCIB;
+        this.parameterArray[12]=this.priceNew;
+        this.parameterArray[13]=this.yourPrice;
+        this.parameterArray[14]=this.pricePaid;
+        this.parameterArray[15]=this.itemCondition;
+        this.parameterArray[16]=this.boxCondition;
+        this.parameterArray[17]=this.manualCondition;
+        this.parameterArray[18]=this.notes;
+        this.parameterArray[19]=this.tags;
     }
 
     public Game(String platform, String category, String userRecord, String title, String country, String releaseType, String publisher, String developer, String createdAt, String ownership, String priceLoose, String priceCIB, String priceNew, String yourPrice, String pricePaid, String itemCondition, String boxCondition, String manualCondition, String notes, String tags) {
@@ -1077,6 +1097,26 @@ class Game{
         this.parameters.add("manualCondition");
         this.parameters.add("notes");
         this.parameters.add("tags");
+        this.parameterArray[0]=this.platform;
+        this.parameterArray[1]=this.category;
+        this.parameterArray[2]=this.userRecordType;
+        this.parameterArray[3]=this.title;
+        this.parameterArray[4]=this.country;
+        this.parameterArray[5]=this.releaseType;
+        this.parameterArray[6]=this.publisher;
+        this.parameterArray[7]=this.developer;
+        this.parameterArray[8]=this.createdAt;
+        this.parameterArray[9]=this.ownership;
+        this.parameterArray[10]=this.priceLoose;
+        this.parameterArray[11]=this.priceCIB;
+        this.parameterArray[12]=this.priceNew;
+        this.parameterArray[13]=this.yourPrice;
+        this.parameterArray[14]=this.pricePaid;
+        this.parameterArray[15]=this.itemCondition;
+        this.parameterArray[16]=this.boxCondition;
+        this.parameterArray[17]=this.manualCondition;
+        this.parameterArray[18]=this.notes;
+        this.parameterArray[19]=this.tags;
     }
 
     public String getGame() {
