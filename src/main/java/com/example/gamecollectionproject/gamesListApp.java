@@ -32,6 +32,9 @@ public class gamesListApp extends Application {
         gamesList gameList = new gamesList(new ArrayList<Game>(gameGetter(f)));
         ArrayList<Game> gamesCollection = gameList.getGames();
         BorderPane view = new BorderPane();
+        TreeView tree = new TreeView();
+
+        Hashtable counter = new Hashtable();
         TilePane labels = new TilePane();
         GridPane grid = new GridPane();
         HBox top = new HBox();
@@ -189,6 +192,9 @@ public class gamesListApp extends Application {
                 }
                 sortButton.setText("Current sort: " + temp.getName().toString().replace("sortBy","") +  " -> Sort next: " + sortQueue.peek().getName().toString().replace("sortBy",""));
                 out.positionCaret(scrollPos);
+                if(tree.isVisible()){
+                   tree.setRoot(createTree(gameList));
+                }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
@@ -262,6 +268,10 @@ public class gamesListApp extends Application {
         EventHandler backup = new EventHandler() {
             @Override
             public void handle(Event event) {
+                    out.setVisible(true);
+                    out.setManaged(true);
+                    tree.setManaged(false);
+                    tree.setVisible(false);
                     String name = "Backup"+(Math.random()*10)*(System.currentTimeMillis()/100)+".csv";
                     File g = new File((name));
                     try(FileWriter writer = new FileWriter(g)){
@@ -301,11 +311,24 @@ public class gamesListApp extends Application {
             }
         });
         asTree.setOnAction(actionEvent -> {
-            String temp =sortQueue.peek().getName().toString().replace("sortBy","");
-            TreeView trr = new TreeView();
-            Stage treeStage = new Stage();
-            BorderPane treePane = new BorderPane();
-            VBox v = new VBox();
+            if(out.isVisible()){
+                out.setVisible(false);
+                out.setManaged(false);
+                tree.setManaged(true);
+                tree.setVisible(true);
+            }else{
+                out.setVisible(true);
+                out.setManaged(true);
+                tree.setManaged(false);
+                tree.setVisible(false);
+            }
+//            String temp =sortQueue.peek().getName().toString().replace("sortBy","");
+//            TreeView trr = new TreeView();
+//            Stage treeStage = new Stage();
+//            BorderPane treePane = new BorderPane();
+//            VBox v = new VBox();
+
+            tree.setRoot(createTree(gameList));
 //            TreeSet<String> tree = new TreeSet();
 //            for(int i=0; i< gameList.getGames().size(); i++){
 //                if(!(tree.contains(gameList.getGames().get(i).getTitle()))){
@@ -313,17 +336,17 @@ public class gamesListApp extends Application {
 //                }
 //            }
 //            System.out.println(tree.toString());
-            TextArea t = new TextArea();
-            t.setMinHeight(30);
-            t.setMinWidth(30);
-            t.setText(temp);
-            v.getChildren().add(t);
-            treePane.setCenter(v);
-            Scene treeScene = new Scene(treePane, 500, 300);
-            treeStage.setTitle("Tree view");
-            treeStage.setResizable(true);
-            treeStage.setScene(treeScene);
-            treeStage.show();
+//            TextArea t = new TextArea();
+//            t.setMinHeight(30);
+//            t.setMinWidth(30);
+//            t.setText(temp);
+//            v.getChildren().add(t);
+//            treePane.setCenter(v);
+//            Scene treeScene = new Scene(treePane, 500, 300);
+//            treeStage.setTitle("Tree view");
+//            treeStage.setResizable(true);
+//            treeStage.setScene(treeScene);
+//            treeStage.show();
         });
         grid.setStyle("-fx-background-color: FFFF00;");
         grid.setPadding(new Insets(5,5,5,5));
@@ -334,8 +357,10 @@ public class gamesListApp extends Application {
         output.setMinHeight(300);
         view.setPadding(new Insets(5,5,5,5));
         view.setLeft(grid);
-        output.getChildren().add(sortButton);
- //       output.getChildren().add(asTree);
+        tree.setManaged(false);
+        tree.setVisible(false);
+
+        output.getChildren().addAll(tree,sortButton,asTree);
         view.setCenter(output);
         view.setRight(new VBox());
         view.setTop(top);
@@ -369,6 +394,22 @@ public class gamesListApp extends Application {
         }
         return temp;
     }
+    TreeItem<String> createTree(gamesList games){
+        TreeItem<String> rootItem = new TreeItem<String> ("Games", new VBox());
+        TreeItem<String> item1;
+        rootItem.setExpanded(true);
+        for(int k=0; k<games.getGames().size();k++) {
+            item1 = new TreeItem<String> (games.getGames().get(k).getTitle(), new VBox());
+            for (int i = 0; i < games.parameterCounter(); i++) {
+                if(!(games.getGames().get(k).getParameter(i).equalsIgnoreCase("") || games.getGames().get(k).getParameter(i).equalsIgnoreCase("Missing Field") || games.getGames().get(k).getParameter(i).equalsIgnoreCase("Null"))){
+                    TreeItem<String> item = new TreeItem<String>(games.getGames().get(k).getParameter(i));
+                    item1.getChildren().add(item);
+                }
+            }
+            rootItem.getChildren().add(item1);
+        }
+        return rootItem;
+    }
 }
 class gamesList{
     ArrayList<Game> games;
@@ -398,6 +439,9 @@ class gamesList{
     }
     public ArrayList<Game> getGames() {
         return games;
+    }
+    public int parameterCounter(){
+        return 20;
     }
     public String[][] getGamesString(){
         HashSet<String> e = new HashSet<String>();
@@ -832,6 +876,7 @@ class Game{
     String notes;
     String tags;
     String game;
+    String[] parameterArray;
 
     public Game() {
         this.platform="null";
@@ -864,6 +909,7 @@ class Game{
             s[i]= s[i].replaceAll("\"","");
             s[i] = s[i].trim();
         }
+        parameterArray=s;
         this.platform=s[0];
         this.category=s[1];
         this.userRecordType=s[2];
@@ -1123,5 +1169,9 @@ class Game{
 
     public void setTags(String tags) {
         this.tags = tags;
+    }
+
+    public String getParameter(int i) {
+        return parameterArray[i];
     }
 }
