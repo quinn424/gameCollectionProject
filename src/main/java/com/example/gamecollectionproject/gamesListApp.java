@@ -22,19 +22,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.util.*;
 
 public class gamesListApp extends Application {
 
     @Override
-    public void start(Stage stage) throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void start(Stage stage) throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, InterruptedException {
         File f = new File("gameCollection.csv");
         gamesList gameList = new gamesList(new ArrayList<Game>(gameGetter(f)));
         ArrayList<Game> gamesCollection = gameList.getGames();
         BorderPane view = new BorderPane();
         TreeView tree = new TreeView();
-
         Hashtable counter = new Hashtable();
         TilePane labels = new TilePane();
         GridPane grid = new GridPane();
@@ -43,6 +43,9 @@ public class gamesListApp extends Application {
         VBox output = new VBox();
         TextArea out = new TextArea();
         Scene scene = new Scene(view, 800, 600);
+        HBox bar = new HBox();
+        bar.setAlignment(Pos.CENTER);
+        bar.setPadding(new Insets(3,3,3,3));
         out.setWrapText(true);
         out.setText("");
         int pos=out.caretPositionProperty().get();
@@ -51,6 +54,7 @@ public class gamesListApp extends Application {
         }
         out.positionCaret(pos);
         out.setEditable(false);
+        output.getChildren().add(bar);
         output.getChildren().add(out);
         labels.setVgap(3);
         labels.setHgap(3);
@@ -105,10 +109,10 @@ public class gamesListApp extends Application {
         double yourTotal=0.0; //Price paid as of acquired date
         int titleCount=gameList.getGames().size();
         for(int i=0; i<gameList.getGames().size();i++){
-            if(!(gameList.getGames().get(i).getPriceNew().equalsIgnoreCase("-1.0") || gameList.getGames().get(i).getPriceNew().equalsIgnoreCase("?") || gameList.getGames().get(i).getPriceNew().matches(".*[a-z].*") || gameList.getGames().get(i).getPriceNew().equalsIgnoreCase("CIB"))) {
+            if(!(gameList.getGames().get(i).getPriceNew().equalsIgnoreCase("-1.0") || gameList.getGames().get(i).getPriceNew().equalsIgnoreCase("?") || gameList.getGames().get(i).getPriceNew().matches(".*[a-z].*") || gameList.getGames().get(i).getPriceNew().equalsIgnoreCase("CIB")  || gameList.getGames().get(i).getPriceNew().equalsIgnoreCase(""))) {
                 value = value + Double.parseDouble(gameList.getGames().get(i).getPriceNew());
             }
-            if(!(gameList.getGames().get(i).getYourPrice().equalsIgnoreCase("-1.0") || gameList.getGames().get(i).getYourPrice().equalsIgnoreCase("?") || gameList.getGames().get(i).getYourPrice().matches(".*[a-z].*") || gameList.getGames().get(i).getYourPrice().equalsIgnoreCase("CIB"))) {
+            if(!(gameList.getGames().get(i).getYourPrice().equalsIgnoreCase("-1.0") || gameList.getGames().get(i).getYourPrice().equalsIgnoreCase("?") || gameList.getGames().get(i).getYourPrice().matches(".*[a-z].*") || gameList.getGames().get(i).getYourPrice().equalsIgnoreCase("CIB") || gameList.getGames().get(i).getYourPrice().equalsIgnoreCase(""))) {
                 yourTotal=yourTotal+Double.parseDouble(gameList.getGames().get(i).getYourPrice());
             }
         }
@@ -122,6 +126,11 @@ public class gamesListApp extends Application {
         submitButton.setTooltip(new Tooltip("Adds any filled fields to the list, as long as there is a title and there is no existing exact match."));
         Button removeButton=new Button("Remove");
         removeButton.setTooltip(new Tooltip("Removes the first result matching all of the inputted fields."));
+        Label searchLabel = new Label("Search List (Title): ");
+        TextField searchBarField = new TextField();
+        Button submitSearchTitleButton = new Button();
+        submitSearchTitleButton.setTooltip(new Tooltip("Searches the list of games & displays any that contain the inputted text. Does not support treeview."));
+        submitSearchTitleButton.setText("Submit");
         Button showAllButton=new Button("Show All");
         Button showDevelopersButton=new Button("Show Developers");
         Button showPublishersButton=new Button("Show Publishers");
@@ -141,6 +150,7 @@ public class gamesListApp extends Application {
         Button createBackupButton=new Button("Create backup of current list");
         Button clearButton=new Button("Clear Games");
         Region left = new Region();
+        bar.getChildren().addAll(searchLabel,searchBarField,submitSearchTitleButton);
         HBox.setHgrow(left,Priority.ALWAYS);
         GridPane.setConstraints(platform,0,0);
         GridPane.setConstraints(platformField,1,0);
@@ -196,6 +206,7 @@ public class gamesListApp extends Application {
                 out.appendText(gameList.getGames().get(i).toString() + "\n\n");
             }
             out.positionCaret(scrollPos);
+            tree.setRoot(createTree(gameList));
         });
         Queue<Method> sortQueue = new LinkedList<Method>();
         sortQueue.add((gameList.getClass().getMethod(("sortByCountry"))));
@@ -232,6 +243,7 @@ public class gamesListApp extends Application {
                 out.appendText(gameList.getGames().get(i).toString() + "\n\n");
             }
             out.positionCaret(scrollPos);
+            tree.setRoot(createTree(gameList));
         });
         showTitlesButton.setOnAction(actionEvent -> {
             out.setVisible(true);
@@ -247,6 +259,32 @@ public class gamesListApp extends Application {
             }
             out.appendText("Size is: "+gameList.titleCount());
             out.positionCaret(scrollPos);
+        });
+        submitSearchTitleButton.setOnAction(actionEvent->{ //Part 4: Additional Improvement
+            ArrayList<Game> temp = new ArrayList<>();
+            out.clear();
+            Thread t = new Thread(new Runnable() { //Part 4: Multithreading (1)
+                @Override
+                public void run() {
+                    for(int i=0; i<gameList.getGames().size();i++){
+                        Game g = gameList.getGames().get(i);
+                        if(g.getTitle().toLowerCase().contains(searchBarField.getText().toLowerCase())){
+                            temp.add(g);
+                            out.appendText(g.toString() + "\n\n");
+                        }
+                    }
+                    tree.setVisible(false);
+                    tree.setManaged(false);
+                    out.setVisible(true);
+                    out.setManaged(true);
+                }
+            });
+            t.start();
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         });
         showAllButton.setOnAction(actionEvent -> {
             out.setVisible(true);
@@ -365,6 +403,11 @@ public class gamesListApp extends Application {
                 tree.setManaged(false);
                 tree.setVisible(false);
             }
+            if(asTree.getText().toLowerCase().contains("tree")){
+                asTree.setText("Show as List");
+            }else{
+                asTree.setText("Show as Tree");
+            }
             tree.setRoot(createTree(gameList));
         });
         grid.setStyle("-fx-background-color: #a6eded;");
@@ -376,6 +419,7 @@ public class gamesListApp extends Application {
         output.setMinHeight(300);
         view.setPadding(new Insets(5,5,5,5));
         view.setLeft(grid);
+        submitButton.setText("Submit");
         tree.setManaged(false);
         tree.setVisible(false);
 
@@ -389,13 +433,32 @@ public class gamesListApp extends Application {
         stage.setScene(scene);
         stage.show();
         stage.setOnCloseRequest(Event ->{
-            try(FileWriter writer = new FileWriter(f)){
-                writer.write(gameList.parameters.toString() + "\n");
-                for(int i=0; i<gameList.getGames().size();i++){
-                    writer.write(gamesCollection.get(i).toString() + "\n");
+            if(!gameList.getGames().isEmpty()) {
+                try (FileWriter writer = new FileWriter(f)) {
+                    writer.write(gameList.parameters.toString() + "\n");
+                    for (int i = 0; i < gameList.getGames().size(); i++) {
+                        writer.write(gamesCollection.get(i).toString() + "\n");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            }else{
+                File g = new File("tempBackup"+(int)(Math.random()*100)+".csv");
+                try {
+                    Files.copy(f.toPath(),g.toPath());
+
+                    try (FileWriter writer = new FileWriter(f)) {
+                        writer.write(gameList.parameters.toString() + "\n");
+                        for (int i = 0; i < gameList.getGames().size(); i++) {
+                            writer.write(gamesCollection.get(i).toString() + "\n");
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
             System.exit(0);
         });
@@ -403,13 +466,32 @@ public class gamesListApp extends Application {
     public static void main(String[] args) {
         launch();
     }
-    ArrayList<Game> gameGetter(File file) throws IOException {
-        ArrayList<Game> temp = new ArrayList<>();
+    ArrayList<Game> gameGetter(File file) throws IOException, InterruptedException {
+        ArrayList<Game> temp = new ArrayList<>(); //Part 4: Multithreading(2)
         Scanner reader = new Scanner(file);
-        reader.nextLine();
-        while(reader.hasNextLine()){
-            Game game = new Game(reader.nextLine());
-            temp.add(game);
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                reader.nextLine();
+                while (reader.hasNextLine()) {
+                    Game game = new Game(reader.nextLine());
+                    game.setTitle(game.getTitle().replaceAll(",",""));
+                    game.setCategory(game.getCategory().replaceAll(",",""));
+                    game.setCountry(game.getCountry().replaceAll(",",""));
+                    game.setCreatedAt(game.getCreatedAt().replaceAll(",",""));
+                    game.setPlatform(game.getPlatform().replaceAll(",",""));
+                    game.setPublisher(game.getPublisher().replaceAll(",",""));
+                    game.setDeveloper(game.getDeveloper().replaceAll(",",""));
+                    game.setNotes(game.getNotes().replaceAll(",",""));
+                    game.setUserRecordType(game.getUserRecordType().replaceAll(",",""));
+                    temp.add(game);
+                }
+            }
+        });
+        thread.start();
+        thread.join();
+        if(temp.isEmpty()){
+            //System.exit(1);
         }
         return temp;
     }
@@ -430,7 +512,7 @@ public class gamesListApp extends Application {
         return rootItem;
     }
 }
-class gamesList{
+class gamesList extends Thread{
     ArrayList<Game> games;
     HashSet<String> lister;
     ArrayList<String> arrayLister;
@@ -445,6 +527,30 @@ class gamesList{
             parameters.add(e[i].getName());
         }
         this.games = new ArrayList<>();
+    }
+    public void run(){
+
+    }
+    public void publisherThread(){
+        Thread publishSortThread = new Thread(this::sortByPublisher);
+        publishSortThread.start();
+    }
+    public void developerThread(){
+        Thread sortThread = new Thread(this::sortByDeveloper);
+        sortThread.start();
+    }
+    public void countryThread(){
+        Thread publishSortThread = new Thread(this::sortByCountry);
+        publishSortThread.start();
+    }
+    public void platformThread(){
+        Thread sortThread = new Thread(this::sortByPlatform);
+        sortThread.start();
+    }
+    public void titlesThread(){
+        System.out.println("test");
+        Thread sortThread = new Thread(this::sortByTitles);
+        sortThread.start();
     }
     public gamesList(ArrayList<Game> games){
         this.lister = new HashSet<String>();
@@ -719,7 +825,7 @@ class gamesList{
     }
     public boolean add(String platform, String category, String userRecordType, String title, String country, String releaseType, String publisher, String developer, String createdAt, String ownership, String priceLoose, String priceCIB, String priceNew, String yourPrice, String pricePaid, String itemCondition, String boxCondition, String manualCondition, String notes, String tags) {
         String game="\""+platform+"\", \"" +category+"\", \""+userRecordType+"\", \""+title+"\", \""+country+"\", \""+releaseType+"\", \""+publisher+"\", \""+developer+"\", \""+createdAt+"\", \""+ownership+"\", \""+priceLoose+"\", \""+priceCIB+"\", \""+priceNew+"\", \""+yourPrice+"\", \""+pricePaid+"\", \""+itemCondition+"\", \""+boxCondition+"\", \""+manualCondition+"\", \""+notes+"\", \""+tags+"\"";
-        Game t = new Game(platform, category, userRecordType, title, country, releaseType,publisher,developer,createdAt,ownership,priceLoose,priceCIB,priceNew,yourPrice,pricePaid,itemCondition,boxCondition,manualCondition,notes,tags);
+        Game t = new Game(platform.replaceAll(",",""), category.replaceAll(",",""), userRecordType.replaceAll(",",""), title.replaceAll(",",""), country.replaceAll(",",""), releaseType.replaceAll(",",""),publisher.replaceAll(",",""),developer.replaceAll(",",""),createdAt.replaceAll(",",""),ownership.replaceAll(",",""),priceLoose.replaceAll(",",""),priceCIB.replaceAll(",",""),priceNew,yourPrice,pricePaid,itemCondition,boxCondition,manualCondition,notes.replaceAll(",",""),tags.replaceAll(",",""));
         boolean valid=true;
         if(!(title.isEmpty())) {
             for (int i = 0; i < this.games.size(); i++) {
@@ -944,8 +1050,10 @@ class Game{
     }
     public Game(String data) {
         this.game=data;
-        String[] s = data.split("(?!<=\\d),");
+        //data = data.replaceAll(", ","");
+        String[] s = data.split(",");
         for(int i=0; i<s.length; i++){
+            System.out.println(s[i]);
             s[i]= s[i].replaceAll("\"","");
             s[i] = s[i].trim();
         }
@@ -971,26 +1079,26 @@ class Game{
         this.parameters.add("notes");
         this.parameters.add("tags");
 
-        this.platform=s[0];
-        this.category=s[1];
-        this.userRecordType=s[2];
-        this.title=s[3];
-        this.country=s[4];
-        this.releaseType=s[5];
-        this.publisher=s[6];
-        this.developer=s[7];
-        this.createdAt=s[8];
-        this.ownership=s[9];
-        this.priceLoose=s[10];
-        this.priceCIB=s[11];
-        this.priceNew=s[12];
-        this.yourPrice=s[13];
-        this.pricePaid=s[14];
-        this.itemCondition=s[15];
-        this.boxCondition=s[16];
-        this.manualCondition=s[17];
-        this.notes=s[18];
-        this.tags=s[19];
+        this.platform=s[0].replaceAll(",","");
+        this.category=s[1].replaceAll(",","");
+        this.userRecordType=s[2].replaceAll(",","");;
+        this.title=s[3].replaceAll(",","");;
+        this.country=s[4].replaceAll(",","");;
+        this.releaseType=s[5].replaceAll(",","");;
+        this.publisher=s[6].replaceAll(",","");;
+        this.developer=s[7].replaceAll(",","");;
+        this.createdAt=s[8].replaceAll(",","");;
+        this.ownership=s[9].replaceAll(",","");;
+        this.priceLoose=s[10].replaceAll(",","");;
+        this.priceCIB=s[11].replaceAll(",","");;
+        this.priceNew=s[12].replaceAll(",","");;
+        this.yourPrice=s[13].replaceAll(",","");;
+        this.pricePaid=s[14].replaceAll(",","");;
+        this.itemCondition=s[15].replaceAll(",","");
+        this.boxCondition=s[16].replaceAll(",","");
+        this.manualCondition=s[17].replaceAll(",","");
+        this.notes=s[18].replaceAll(",","");;
+        this.tags=s[19].replaceAll(",","");;
     }
 
     public Game(Game game) {
