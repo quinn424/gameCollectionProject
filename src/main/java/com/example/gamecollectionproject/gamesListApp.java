@@ -512,7 +512,7 @@ public class gamesListApp extends Application {
         return rootItem;
     }
 }
-class gamesList extends Thread{
+class gamesList{ //This class holds the collection of games
     ArrayList<Game> games;
     HashSet<String> lister;
     ArrayList<String> arrayLister;
@@ -528,9 +528,6 @@ class gamesList extends Thread{
         }
         this.games = new ArrayList<>();
     }
-    public void run(){
-
-    }
     public gamesList(ArrayList<Game> games){
         this.lister = new HashSet<String>();
         this.arrayLister = new ArrayList<>();
@@ -545,10 +542,10 @@ class gamesList extends Thread{
         return games;
     }
     public int parameterCounter(){
-        return 20;
+        return 20; //The max amount of parameters used overall for the games.
     }
     public String[][] getGamesString(){
-        HashSet<String> e = new HashSet<String>();
+        HashSet<String> e = new HashSet<String>(); //Retrieves the list of games and converts it to a String[][]
         ArrayList<String> t = new ArrayList<>();
         int count=0;
         int index=0;
@@ -580,7 +577,7 @@ class gamesList extends Thread{
         return temp;
     }
     public String[][] getCountries(){
-        HashSet<String> e = new HashSet<String>();
+        HashSet<String> e = new HashSet<String>(); //Returns the countries and the count for each one.
         ArrayList<String> t = new ArrayList<>();
         this.sortByCountry();
         int count=0;
@@ -613,7 +610,7 @@ class gamesList extends Thread{
         return sort(temp);
     }
     public String[][] getPublishers(){
-        HashSet<String> e = new HashSet<String>();
+        HashSet<String> e = new HashSet<String>(); //Returns the publishers and the count for each one.
         ArrayList<String> t = new ArrayList<>();
         this.sortByPublisher();
         int count=0;
@@ -646,7 +643,7 @@ class gamesList extends Thread{
         return sort(temp);
     }
     public String[][] getDevelopers(){
-        HashSet<String> e = new HashSet<String>();
+        HashSet<String> e = new HashSet<String>(); //Returns the developers and the count for each one.
         ArrayList<String> t = new ArrayList<>();
         this.sortByDeveloper();
         int count=0;
@@ -712,8 +709,8 @@ class gamesList extends Thread{
         for(int i=0; i<this.games.size();i++){
             if(this.games.get(i).getTitle().equalsIgnoreCase(title)) {
                 status=true;
-                Game temp2 = new Game(this.games.get(i).getGameExact());
-                if(platform.isEmpty()){
+                Game temp2 = new Game(this.games.get(i).getGameExact()); //Creates a temporary game to compare the input to
+                if(platform.isEmpty()){ //The following sets the temporary fields that are missing from the compared game to blank in order to get a closer result at the end.
                     temp2.setPlatform("");
                 }
                 if(category.isEmpty()){
@@ -791,7 +788,7 @@ class gamesList extends Thread{
     }
     public boolean add(String game) {
         boolean valid=true;
-        for(int i=0; i<this.games.size();i++){
+        for(int i=0; i<this.games.size();i++){ //Converts the input into form that can be compared to and then added to the list.
             String[] temp = game.split("\",\"");
             if((this.games.get(i).toString().equalsIgnoreCase(game))){
                 valid=false;
@@ -1029,7 +1026,6 @@ class Game{
     }
     public Game(String data) {
         this.game=data;
-        //data = data.replaceAll(", ","");
         String[] s = data.split(",");
         for(int i=0; i<s.length; i++){
             s[i]= s[i].replaceAll("\"","");
