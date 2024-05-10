@@ -137,15 +137,6 @@ public class gamesListApp extends Application {
         Button showCountriesButton=new Button("Show Countries");
         Button showTitlesButton=new Button("Show Titles");
         Button asTree=new Button("Show as Tree");
-        Button sortByTitlesButton = new Button("Sort By Titles");
-        Button sortByPublishers = new Button("Sort By Publishers");
-        Button sortByCategory = new Button("Sort By Category");
-        Button sortByPlatform = new Button("Sort By Platform");
-        Button sortByCountry = new Button("Sort By Country");
-        Button sortByDeveloper = new Button("Sort By Developers");
-        Button sortByDate = new Button("Sort By Date");
-        Button sortByPricePaid = new Button("Sort By Paid");
-        Button sortByItemCondition = new Button("Sort by Item Condition");
         Button sortButton = new Button("Click to cycle through sorts for the full list display");
         Button createBackupButton=new Button("Create backup of current list");
         Button clearButton=new Button("Clear Games");
@@ -195,7 +186,6 @@ public class gamesListApp extends Application {
         GridPane.setConstraints(submitButton,0,20);
         GridPane.setConstraints(removeButton,1,20);
         HBox top = new HBox(createBackupButton,clearButton,left,totalTitles,totalValue,totalYourPrice);
-        //top.getChildren().addAll(createBackupButton,clearButton);
         grid.getChildren().addAll(platform,platformField,category,categoryField,userRecordType,userRecordTypeField,title,titleField,country,countryField,releaseType,releaseTypeField,publisher,publisherField,developer,developerField,createdAt,createdAtField,ownership,ownershipField,priceLoose,priceLooseField,priceCIB,priceCIBField,priceNew,priceNewField,yourPrice,yourPriceField,pricePaid,pricePaidField,itemCondition,itemConditionField,boxCondition,boxConditionField,manualCondition,manualConditionField,notes,notesField,tags,tagsField,submitButton,removeButton);
         options.getChildren().addAll(showAllButton,showCountriesButton,showTitlesButton,showDevelopersButton,showPublishersButton);
         submitButton.setOnAction(actionEvent -> {
@@ -1053,7 +1043,7 @@ class Game{
         this.parameters.add("notes");
         this.parameters.add("tags");
 
-        this.platform=s[0].replaceAll(",","");
+        this.platform=s[0].replaceAll(",",""); //Cleans up the input & adds it.
         this.category=s[1].replaceAll(",","");
         this.userRecordType=s[2].replaceAll(",","");;
         this.title=s[3].replaceAll(",","");;
