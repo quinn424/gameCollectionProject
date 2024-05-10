@@ -531,27 +531,6 @@ class gamesList extends Thread{
     public void run(){
 
     }
-    public void publisherThread(){
-        Thread publishSortThread = new Thread(this::sortByPublisher);
-        publishSortThread.start();
-    }
-    public void developerThread(){
-        Thread sortThread = new Thread(this::sortByDeveloper);
-        sortThread.start();
-    }
-    public void countryThread(){
-        Thread publishSortThread = new Thread(this::sortByCountry);
-        publishSortThread.start();
-    }
-    public void platformThread(){
-        Thread sortThread = new Thread(this::sortByPlatform);
-        sortThread.start();
-    }
-    public void titlesThread(){
-        System.out.println("test");
-        Thread sortThread = new Thread(this::sortByTitles);
-        sortThread.start();
-    }
     public gamesList(ArrayList<Game> games){
         this.lister = new HashSet<String>();
         this.arrayLister = new ArrayList<>();
@@ -1053,7 +1032,6 @@ class Game{
         //data = data.replaceAll(", ","");
         String[] s = data.split(",");
         for(int i=0; i<s.length; i++){
-            System.out.println(s[i]);
             s[i]= s[i].replaceAll("\"","");
             s[i] = s[i].trim();
         }
